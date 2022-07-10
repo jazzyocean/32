@@ -1,0 +1,702 @@
+<style type="text/css">
+    
+    body {
+        background-color: #F0F0F0;
+        font-family: "Courier New", "Courier", monospace;
+        font-size: 20px;
+    }
+
+    table {
+        border-collapse: collapse;
+        font-family: "Courier New", "Courier", monospace;
+        font-size: 20px;
+    }
+
+    th {
+        font-weight: normal;
+        border: 1px solid black;
+        text-align: center;
+    }
+    th, td {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+    
+    tr:hover, td:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    td, th, table {
+        border: 1px solid black;
+    }
+
+    .hoverable {
+        color: rgb(0, 132, 255);
+        cursor: pointer;
+    }
+    
+    code {
+        background-color: rgba(0, 0, 0, 0.1);
+        padding: 2px;
+        border-radius: 3px;
+    }
+
+    .matrix tr td, .matrix tr th {
+        width: 8ch;
+        height: 4ch;
+        text-align: center;
+    }
+
+    .matrix tr th {
+        font-weight: bold;
+    }
+    </style>
+
+
+<table>
+    <thead>
+        <tr>
+            <th class="hoverable" title="Instruction byte">Opc</th>
+            <th class="hoverable" title="Mnemonic">Mn.</th>
+            <th class="hoverable" title="Source">Src</th>
+            <th class="hoverable" title="Destination">Dst</th>
+            <th class="hoverable" title="Flags set by instruction">Fl. Set</th>
+            <th class="hoverable" title="Flags tested by instruction">Fl. Test</th>
+            <th class="hoverable" title="Description of instruction">Desc.</th>
+        </tr>
+    </thead>
+    <tbody id="ops">
+    </tbody>
+</table>
+
+<br><br><br>
+<table id="opsmatrix" class="matrix">
+</table>
+
+<script>
+    let opstable = {
+        0x00: {
+            "mn": "MOV",
+            "src": "reg",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Moves data into register"
+        },
+        0x01: {
+            "mn": "MOV",
+            "src": "imm8",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Moves data into register"
+        },
+        0x02: {
+            "mn": "MOV",
+            "src": "imm16",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Moves data into register"
+        },
+        0x03: {
+            "mn": "MOV",
+            "src": "imm32",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Moves data into register"
+        },
+
+        0x04: {
+            "mn": "LDR",
+            "src": "byte*",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Loads data into register from memory"
+        },
+        0x05: {
+            "mn": "LDR",
+            "src": "word*",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Loads data into register from memory"
+        },
+        0x06: {
+            "mn": "LDR",
+            "src": "dword*",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Loads data into register from memory"
+        },
+        0x07: {
+            "mn": "LDR",
+            "src": "byte*r",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Loads data into register from memory"
+        },
+        0x08: {
+            "mn": "LDR",
+            "src": "word*r",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Loads data into register from memory"
+        },
+        0x09: {
+            "mn": "LDR",
+            "src": "dword*r",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Loads data into register from memory"
+        },
+
+        0x0a: {
+            "mn": "STR",
+            "src": "reg",
+            "dst": "byte*",
+            "flset": "",
+            "fltest": "",
+            "desc": "Stores data to memory from register"
+        },
+        0x0b: {
+            "mn": "STR",
+            "src": "reg",
+            "dst": "word*",
+            "flset": "",
+            "fltest": "",
+            "desc": "Stores data to memory from register"
+        },
+        0x0c: {
+            "mn": "STR",
+            "src": "reg",
+            "dst": "dword*",
+            "flset": "",
+            "fltest": "",
+            "desc": "Stores data to memory from register"
+        },
+        0x0d: {
+            "mn": "STR",
+            "src": "reg",
+            "dst": "byte*r",
+            "flset": "",
+            "fltest": "",
+            "desc": "Stores data to memory from register"
+        },
+        0x0e: {
+            "mn": "STR",
+            "src": "reg",
+            "dst": "word*r",
+            "flset": "",
+            "fltest": "",
+            "desc": "Stores data to memory from register"
+        },
+        0x0f: {
+            "mn": "STR",
+            "src": "reg",
+            "dst": "dword*r",
+            "flset": "",
+            "fltest": "",
+            "desc": "Stores data to memory from register"
+        },
+
+        
+        0x10: {
+            "mn": "ADD",
+            "src": "reg",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Adds"
+        },
+        0x11: {
+            "mn": "ADD",
+            "src": "imm8",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Adds"
+        },
+        0x12: {
+            "mn": "ADD",
+            "src": "imm16",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Adds"
+        },
+        0x13: {
+            "mn": "ADD",
+            "src": "imm32",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Adds"
+        },
+        0x14: {
+            "mn": "ADC",
+            "src": "reg",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Adds with carry"
+        },
+        0x15: {
+            "mn": "ADC",
+            "src": "imm8",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Adds with carry"
+        },
+        0x16: {
+            "mn": "ADC",
+            "src": "imm16",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Adds with carry"
+        },
+        0x17: {
+            "mn": "ADC",
+            "src": "imm32",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Adds with carry"
+        },
+
+        0x18: {
+            "mn": "SUB",
+            "src": "reg",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Subtracts"
+        },
+        0x19: {
+            "mn": "SUB",
+            "src": "imm8",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Subtracts"
+        },
+        0x1a: {
+            "mn": "SUB",
+            "src": "imm16",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Subtracts"
+        },
+        0x1b: {
+            "mn": "SUB",
+            "src": "imm32",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Subtracts"
+        },
+        0x1c: {
+            "mn": "SBC",
+            "src": "reg",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Subtracts with carry"
+        },
+        0x1d: {
+            "mn": "SBC",
+            "src": "imm8",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Subtracts with carry"
+        },
+        0x1e: {
+            "mn": "SBC",
+            "src": "imm16",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Subtracts with carry"
+        },
+        0x1f: {
+            "mn": "SBC",
+            "src": "imm32",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Subtracts with carry"
+        },
+
+        0x20: {
+            "mn": "MUL",
+            "src": "reg",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Multiplies"
+        },
+        0x21: {
+            "mn": "MUL",
+            "src": "imm8",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Multiplies"
+        },
+        0x22: {
+            "mn": "MUL",
+            "src": "imm16",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Multiplies"
+        },
+        0x23: {
+            "mn": "MUL",
+            "src": "imm32",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Multiplies"
+        },
+
+        0x24: {
+            "mn": "DIV",
+            "src": "reg",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Divides"
+        },
+        0x25: {
+            "mn": "DIV",
+            "src": "imm8",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Divides"
+        },
+        0x26: {
+            "mn": "DIV",
+            "src": "imm16",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Divides"
+        },
+        0x27: {
+            "mn": "DIV",
+            "src": "imm32",
+            "dst": "reg",
+            "flset": "",
+            "fltest": "",
+            "desc": "Divides"
+        },
+
+        0x28: {
+            "mn": "JSR",
+            "src": "imm8",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Jump to subroutine"
+        },
+        0x29: {
+            "mn": "JSR",
+            "src": "imm16",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Jump to subroutine"
+        },
+        0x2A: {
+            "mn": "JSR",
+            "src": "imm32",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Jump to subroutine"
+        },
+        0x2B: {
+            "mn": "RTS",
+            "src": "",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Return from subroutine"
+        },
+        
+        0x2C: {
+            "mn": "PUSH",
+            "src": "byte",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pushes data to stack"
+        },
+        0x2D: {
+            "mn": "PUSH",
+            "src": "word",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pushes data to stack"
+        },
+        0x2E: {
+            "mn": "PUSH",
+            "src": "dword",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pushes data to stack"
+        },
+        0x2F: {
+            "mn": "PUSH",
+            "src": "r",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pushes data to stack"
+        },
+
+        0x30: {
+            "mn": "PUSH",
+            "src": "byte*",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pushes data to stack"
+        },
+        0x31: {
+            "mn": "PUSH",
+            "src": "word*",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pushes data to stack"
+        },
+        0x32: {
+            "mn": "PUSH",
+            "src": "dword*",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pushes data to stack"
+        },
+        0x34: {
+            "mn": "PUSH",
+            "src": "byte*r",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pushes data to stack"
+        },
+        0x35: {
+            "mn": "PUSH",
+            "src": "word*r",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pushes data to stack"
+        },
+        0x36: {
+            "mn": "PUSH",
+            "src": "dword*r",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pushes data to stack"
+        },
+
+        0x38: {
+            "mn": "POPB",
+            "src": "reg",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pops data from stack"
+        },
+        0x39: {
+            "mn": "POPW",
+            "src": "reg",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pops data from stack"
+        },
+        0x3A: {
+            "mn": "POP",
+            "src": "reg",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Pops data from stack"
+        },
+
+        0x33: {
+            "mn": "JCNZ",
+            "src": "imm8",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Jump if GC is not zero"
+        },
+        0x37: {
+            "mn": "JCNZ",
+            "src": "imm16",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Jump if GC is not zero"
+        },
+        0x3B: {
+            "mn": "JCNZ",
+            "src": "imm32",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Jump if GC is not zero"
+        },
+
+        0x3C: {
+            "mn": "INC",
+            "src": "reg",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Increments"
+        },
+        0x3D: {
+            "mn": "DEC",
+            "src": "reg",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Decrements"
+        },
+        0x3E: {
+            "mn": "INC",
+            "src": "GC",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Increments"
+        },
+        0x3F: {
+            "mn": "DEC",
+            "src": "GC",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Decrements"
+        },
+
+        0xe0: {
+            "mn": "CZR",
+            "src": "",
+            "dst": "",
+            "flset": "",
+            "fltest": "Z",
+            "desc": "Conditional prefix (is zero set)"
+        },
+        0xe1: {
+            "mn": "CNZR",
+            "src": "",
+            "dst": "",
+            "flset": "",
+            "fltest": "z",
+            "desc": "Conditional prefix (is zero unset)"
+        },
+
+        0xe2: {
+            "mn": "CCR",
+            "src": "",
+            "dst": "",
+            "flset": "",
+            "fltest": "C",
+            "desc": "Conditional prefix (is carry set)"
+        },
+        0xe3: {
+            "mn": "CNCR",
+            "src": "",
+            "dst": "",
+            "flset": "",
+            "fltest": "c",
+            "desc": "Conditional prefix (is carry unset)"
+        },
+        
+    }
+
+    let ops = document.getElementById("ops");
+    for (let op in opstable) {
+        let tr = document.createElement("tr");
+        let td = document.createElement("td");
+        td.innerHTML = parseInt(op).toString(16);
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerHTML = opstable[op].mn;
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerHTML = opstable[op].src;
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerHTML = opstable[op].dst;
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerHTML = opstable[op].flset;
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerHTML = opstable[op].fltest;
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerHTML = opstable[op].desc;
+        tr.appendChild(td);
+
+        ops.appendChild(tr);
+    }
+
+    let opsmatrix = document.getElementById("opsmatrix");
+    let tr = document.createElement("tr");
+    let td = document.createElement("td");
+    let th;
+    tr.appendChild(td);
+    for (let i = 0; i < 16; i++) {
+        th = document.createElement("th");
+        th.innerHTML = '0' + i.toString(16);
+        tr.appendChild(th);
+    }
+    opsmatrix.appendChild(tr);
+    // display matrix, 16 cols per row, 16 rows. pad with empty cells
+    for (let i = 0; i < 16; i++) {
+        tr = document.createElement("tr");
+        th = document.createElement("th");
+        th.innerHTML = i.toString(16) + '0';
+        tr.appendChild(th);
+        for (let j = 0; j < 16; j++) {
+            td = document.createElement("td");
+            // fill with mneumonics
+            if (opstable[i * 16 + j]) {
+                td.innerHTML = opstable[i * 16 + j].mn;
+                td.innerHTML += `<br><span style="font-size:14px">${opstable[i * 16 + j].src}>${opstable[i * 16 + j].dst}</span>`;
+            }
+            tr.appendChild(td);
+        }
+        opsmatrix.appendChild(tr);
+    }
+</script>

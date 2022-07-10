@@ -1,0 +1,116 @@
+INSTRUCTION:
+                    --- opc src, dst
+    00 ddddssss     --- mov reg, reg
+    01 dddd0000 i8  --- mov i8, reg
+    02 dddd0000 i16 --- mov i16, reg
+    03 dddd0000 i32 --- mov i32, reg
+
+    04 dddd0000 i32 --- ldr byteptr i32, reg
+    05 dddd0000 i32 --- ldr wordptr i32, reg
+    06 dddd0000 i32 --- ldr dwordptr i32, reg
+    07 ddddssss     --- ldr byteptr reg, reg
+    08 ddddssss     --- ldr wordptr reg, reg
+    09 ddddssss     --- ldr dwordptr reg, reg
+
+    0A dddd0000 i32 --- str reg, byteptr i32
+    0B dddd0000 i32 --- str reg, wordptr i32
+    0C dddd0000 i32 --- str reg, dwordptr i32
+    0D ddddssss     --- str reg, byteptr reg
+    0E ddddssss     --- str reg, wordptr reg
+    0F ddddssss     --- str reg, dwordptr reg
+
+    10 ddddssss     --- add reg, reg
+    11 dddd0000 i8  --- add i8, reg
+    12 dddd0000 i16 --- add i16, reg
+    13 dddd0000 i32 --- add i32, reg
+    14 ddddssss     --- adc reg, reg
+    15 dddd0000 i8  --- adc i8, reg
+    16 dddd0000 i16 --- adc i16, reg
+    17 dddd0000 i32 --- adc i32, reg
+
+    18 ddddssss     --- sub reg, reg
+    19 dddd0000 i8  --- sub i8, reg
+    1A dddd0000 i16 --- sub i16, reg
+    1B dddd0000 i32 --- sub i32, reg
+    1C ddddssss     --- sbc reg, reg
+    1D dddd0000 i8  --- sbc i8, reg
+    1E dddd0000 i16 --- sbc i16, reg
+    1F dddd0000 i32 --- sbc i32, reg
+
+    20 ddddssss     --- mul reg, reg    ;; Bottom 32 bits in dst, top 32 it in accumulator
+    21 dddd0000 i8  --- mul i8, reg     ;; Bottom 32 bits in dst, top 32 it in accumulator
+    22 dddd0000 i16 --- mul i16, reg    ;; Bottom 32 bits in dst, top 32 it in accumulator
+    23 dddd0000 i32 --- mul i32, reg    ;; Bottom 32 bits in dst, top 32 it in accumulator
+
+    24 ddddssss     --- div reg, reg    ;; Store remainder in dst, result in accumulator
+    25 dddd0000 i8  --- div i8, reg     ;; Store remainder in dst, result in accumulator
+    26 dddd0000 i16 --- div i16, reg    ;; Store remainder in dst, result in accumulator
+    27 dddd0000 i32 --- div i32, reg    ;; Store remainder in dst, result in accumulator
+
+    28 i8           --- jsr i8
+    29 i8           --- jsr i16
+    2A i8           --- jsr i32
+    2B              --- rts/ret
+
+    2C i8           --- push i8
+    2D i16          --- push i16
+    2E i32          --- push i32
+    2F reg          --- push reg
+
+    30 i32          --- push byte ptr
+    31 i32          --- push word ptr
+    32 i32          --- push dword ptr
+    33 i8           --- jcnz i8
+
+    34 0000ssss     --- push byte ptr reg
+    35 0000ssss     --- push word ptr reg
+    36 0000ssss     --- push dword ptr reg
+    37 i16          --- jcnz i16
+
+    38              --- popb reg
+    39              --- popw reg
+    3A              --- pop reg
+    3B i32          --- jcnz i32
+
+    3C dddd0000     --- inc reg
+    3D dddd0000     --- dec reg
+    3E              --- inc gc
+    3F              --- dec gc
+
+    80 i8           --- int i8
+    81              --- cli
+    82              --- sti
+    83              --- hlt
+
+
+    
+REGISTERS:
+    0 0000 - null               null
+    1 0001 - General purpose    ga
+    2 0010 - General purpose    gb
+    3 0011 - General purpose    gc
+    4 0100 - General purpose    gd
+    5 0101 - General purpose    ge
+    6 0110 - General purpose    gf
+    7 0111 - General purpose    gg
+    8 1000 - Base pointer       bp
+    9 1001 - Stack pointer      sp
+    A 1010 - Program counter    pc
+    B 1011 - Flags register     fl
+    C 1100 - Reserved
+    D 1101 - Reserved
+    E 1110 - Reserved
+    F 1111 - Reserved
+
+    (1 0001 is accumulator)
+
+FLAGS:
+    F E D C B A 9 8 7 6 5 4 3 2 1 0
+    0-0-0-0 0-0-0-0 0-0-0-0 0-0-0-0
+    P P                   I O S C Z
+
+    Z:   0 Zero
+    C:   1 Carry
+    S:   2 Sign
+    O:   3 Out of bounds
+    P: E-F Privilege
