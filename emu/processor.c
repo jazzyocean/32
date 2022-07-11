@@ -34,25 +34,13 @@ char regnames[16][5] = {
     "BP", "SP", "PC", "FL", "NULL", "NULL", "NULL", "NULL"
 };
 
-void initdisk(Processor *cpu, char* filepath) {
-    FILE *fp = fopen(filepath, "r");
-    fseek(fp, 0, SEEK_END);
-    uint64_t disklength = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    uint8_t *diskptr = malloc(disklength * sizeof(uint8_t));
-    fread(diskptr, sizeof(uint8_t), disklength, fp);
-    cpu->disk = diskptr;
-    cpu->disklimit = disklength;
-}
-
 void initmem(Processor *cpu, uint64_t memlimit) {
     uint8_t *memptr = malloc(memlimit * sizeof(uint8_t));
     cpu->memory = memptr;
     cpu->memlimit = memlimit-1;
 }
 
-void clean(Processor *cpu) {
-    free(cpu->disk);
+void cleanproc(Processor *cpu) {
     free(cpu->memory);
 }
 
@@ -662,11 +650,9 @@ void instruction(Processor *cpu) {
 
 void mainloop(Arch *arch) {
     Processor *cpu = &arch->processor;
-    cpu->registers[pc] = 0;
+    cpu->registers[pc] = 0x7E00;
     cpu->registers[fl] = 0;
     cpu->start = clock();
-    
-    memcpy(cpu->memory, cpu->disk, cpu->disklimit);
 
     cpu->on = 1;
     while (cpu->on) {

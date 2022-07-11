@@ -5,10 +5,10 @@
 #include <time.h>
 #include "types.h"
 
-void initdisk(Processor *emu, char* filepath);
-void initmem(Processor *emu, uint64_t memlimit);
+void initdisk(Processor *cpu, char* filepath);
+void initmem(Processor *cpu, uint64_t memlimit);
 int testbit(uint32_t v, int b);
-void clean(Processor *emu);
+void cleanproc(Processor *cpu);
 void mainloop(Arch *arch);
 void displaymem(uint8_t *buf, uint64_t length);
 

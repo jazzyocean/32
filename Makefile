@@ -19,6 +19,7 @@ flags =\
 	-g\
 	$(inc)\
 	-Wall\
+#	-O3\
 
 libs =\
 	 -L emu/lib\
@@ -34,14 +35,14 @@ $(output): $(objh) $(obj)
 	gcc $(flags) -c $< -o $@
 
 clean_obj:
-	rm $(obj)
+	rm -f $(obj)
 
 clean_headers:
-	rm $(objh)
+	rm -f $(objh)
 
 clean_exec:
-	rm $(output)
+	rm -f $(output)
 
 full_clean:
-	rm $(obj)
-	rm $(output)
+	rm -f $(obj)
+	rm -f $(output)

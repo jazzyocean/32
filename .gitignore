@@ -60,3 +60,4 @@ bin/
 asm/*
 bin/*
 *.bin
+*.drawio.bkp

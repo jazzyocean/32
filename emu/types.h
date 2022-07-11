@@ -17,9 +17,21 @@ typedef struct _vram {
     uint8_t size;
 } Vram;
 
+typedef struct drive {
+    uint8_t *disk;
+    uint64_t limit;
+    uint32_t signature;
+} Drive;
+
+typedef enum DRIVESIGNATURE {
+    DRIVE_EMPTY = 0b1, DRIVE_R = 0b10, DRIVE_RW = 0b100, DRIVE_SYS = 0b1000,
+    DRIVE_GENERAL = 0b10000, DRIVE_REG = 0b100000, DRIVE_LOAD = 0b1000000
+} DRIVESIGTYPE;
+
 typedef struct _bios {
     uint8_t cpuports[65536];
     Device devices[16];
+    Drive drives[16];
     Vram vram;
     uint16_t devmapin[17];
     uint16_t devmapout[17];
@@ -32,8 +44,6 @@ typedef struct _processor {
     uint32_t registers[16];
     uint8_t *memory;
     uint64_t memlimit;
-    uint8_t *disk;
-    uint64_t disklimit;
     uint8_t intid;
     clock_t start;
     pthread_t cpu_thr_id;

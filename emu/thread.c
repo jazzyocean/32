@@ -5,21 +5,21 @@
 #include "debug.h"
 
 void *cpu_thr(void *arg) {
-    Arch arch = *(Arch*)arg;
-    pthread_barrier_wait(&arch.barrier);
-    mainloop(&arch);
+    Arch *arch = (Arch*)arg;
+    pthread_barrier_wait(&arch->barrier);
+    mainloop(arch);
     return NULL;
 }
 
 void *biosc_thr(void *arg) {
-    Arch arch = *(Arch*)arg;
-    pthread_barrier_wait(&arch.barrier);
+    Arch *arch = (Arch*)arg;
+    pthread_barrier_wait(&arch->barrier);
     return NULL;
 }
 
 void *biosp_thr(void *arg) {
-    Arch arch = *(Arch*)arg;
-    pthread_barrier_wait(&arch.barrier);
+    Arch *arch = (Arch*)arg;
+    pthread_barrier_wait(&arch->barrier);
     return NULL;
 }
 
