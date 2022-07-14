@@ -1,0 +1,220 @@
+INSTRUCTION FORMAT
+    mnemonic src, dst
+    (pop instructions have the first argument as dst)
+
+ARGUMENT TYPES
+    byte*   :   byte [imm] OR byte ptr imm
+    word*   :   word [imm] OR word ptr imm
+    dword*  :   dword [imm] OR dword ptr imm
+    imm8    :   imm (where imm <= 0xFF)
+    imm16   :   imm (where imm <= 0xFFFF)
+    imm32   :   imm (where imm <= 0xFFFFFFFF)
+    reg     :   reg (where reg matches entry in reg table)
+    byte*r  :   byte [reg] OR byte ptr reg
+    word*r  :   word [reg] OR word ptr reg
+    dword*r :   dword [reg] OR dword ptr reg
+
+    Labels are assumed to be an imm32/dword*.
+
+REGISTERS
+    null    0   0000
+      ga    1   0001
+      gb    2   0010
+      gc    3   0011
+      gd    4   0100
+      ge    5   0101                        
+      gf    6   0110                        
+      gg    7   0111
+      bp    8   1000
+      sp    9   1001
+      pc    A   1010
+      fl    B   1011
+     tb0    C   1100
+     tb1    D   1101
+
+     
+    » ga is accumulator
+    » gc is counter
+    » bp is the bottom of the Stack
+    » sp is the current position of the stack
+    » pc is the address of the next instruction
+    » fl contains flags that show the result of certain operations and changes how the processor functions
+    » tb0 contains the base address of table instructions
+    » tb1 contains the size of each table element
+
+IMMEDIATES
+     0x···· : hexadecimal
+      $···· : hexadecimal
+     0b···· : binary 
+      %···· : binary
+     0d···· : decimal
+       ···· : decimal
+
+LABELS
+    Labels are defined as follows:
+
+        labelname:
+            code
+
+    If a label name starts with a single underscore,
+    the name of the previously defined label should be
+    appended to the front. Example:
+
+        labelname:
+            code
+        _labelname:     ; this gets parsed as labelname_labelname
+            code
+
+    To refer to labels, write the name of the label.
+
+OUTPUT
+    If a prefix exists, it should be the first byte. The opcode byte comes next. If the
+    opcode has a register as an argument, the register byte comes next. The top 4 bits
+    contains the destination register, and the bottom 4 bits containsthe source register.
+    If only one register is provided, the value of that register should be in both slots
+    (because it looks nice). If any immediates are provided, they should come next in
+    little-endian format.
+
+DIRECTIVES:
+    Directives are prefixed with a period.
+
+    .org imm        --- Sets memory address of next instruction
+    .include file   --- Replaces this line with contents of provided file, and recursively
+                        checks for more .includes
+
+INSTRUCTIONS:
+                    --- opc src, dst
+    00 ddddssss     --- mov reg, reg
+    01 dddd0000 i8  --- mov i8, reg
+    02 dddd0000 i16 --- mov i16, reg
+    03 dddd0000 i32 --- mov i32, reg
+
+    04 dddd0000 i32 --- ldr byteptr i32, reg
+    05 dddd0000 i32 --- ldr wordptr i32, reg
+    06 dddd0000 i32 --- ldr dwordptr i32, reg
+    07 ddddssss     --- ldr byteptr reg, reg
+    08 ddddssss     --- ldr wordptr reg, reg
+    09 ddddssss     --- ldr dwordptr reg, reg
+
+    0A dddd0000 i32 --- str reg, byteptr i32
+    0B dddd0000 i32 --- str reg, wordptr i32
+    0C dddd0000 i32 --- str reg, dwordptr i32
+    0D ddddssss     --- str reg, byteptr reg
+    0E ddddssss     --- str reg, wordptr reg
+    0F ddddssss     --- str reg, dwordptr reg
+
+    10 ddddssss     --- add reg, reg
+    11 dddd0000 i8  --- add i8, reg
+    12 dddd0000 i16 --- add i16, reg
+    13 dddd0000 i32 --- add i32, reg
+    14 ddddssss     --- adc reg, reg
+    15 dddd0000 i8  --- adc i8, reg
+    16 dddd0000 i16 --- adc i16, reg
+    17 dddd0000 i32 --- adc i32, reg
+
+    18 ddddssss     --- sub reg, reg
+    19 dddd0000 i8  --- sub i8, reg
+    1A dddd0000 i16 --- sub i16, reg
+    1B dddd0000 i32 --- sub i32, reg
+    1C ddddssss     --- sbc reg, reg
+    1D dddd0000 i8  --- sbc i8, reg
+    1E dddd0000 i16 --- sbc i16, reg
+    1F dddd0000 i32 --- sbc i32, reg
+
+    20 ddddssss     --- mul reg, reg    ;; Bottom 32 bits in dst, top 32 it in accumulator
+    21 dddd0000 i8  --- mul i8, reg     ;; Bottom 32 bits in dst, top 32 it in accumulator
+    22 dddd0000 i16 --- mul i16, reg    ;; Bottom 32 bits in dst, top 32 it in accumulator
+    23 dddd0000 i32 --- mul i32, reg    ;; Bottom 32 bits in dst, top 32 it in accumulator
+
+    24 ddddssss     --- div reg, reg    ;; Store remainder in dst, result in accumulator
+    25 dddd0000 i8  --- div i8, reg     ;; Store remainder in dst, result in accumulator
+    26 dddd0000 i16 --- div i16, reg    ;; Store remainder in dst, result in accumulator
+    27 dddd0000 i32 --- div i32, reg    ;; Store remainder in dst, result in accumulator
+    
+    28 0000ssss     --- jsra reg
+    29 i16          --- jsra i16
+    2A i32          --- jsra i32
+    2B              --- rts/ret
+
+    2C i8           --- push i8
+    2D i16          --- push i16
+    2E i32          --- push i32
+    2F 0000ssss     --- push reg
+
+    30 i32          --- push byte ptr
+    31 i32          --- push word ptr
+    32 i32          --- push dword ptr
+    33 i8           --- jcnz i8
+
+    34 0000ssss     --- push byte ptr reg
+    35 0000ssss     --- push word ptr reg
+    36 0000ssss     --- push dword ptr reg
+    37 i16          --- jcnz i16
+
+    38              --- popb reg
+    39              --- popw reg
+    3A              --- pop reg
+    3B i32          --- jcnz i32
+
+    3C dddd0000     --- inc reg
+    3D dddd0000     --- dec reg
+    3E              --- inc gc
+    3F              --- dec gc
+
+    40              --- push ga
+    41              --- push gc
+    42              --- push fl
+    43 i32          --- inc byte ptr
+
+    44 ddddssss     --- cmp reg, reg
+    45 0000ssss i8  --- cmp reg, i8
+    46 0000ssss i16 --- cmp reg, i16
+    47 0000ssss i32 --- cmp reg, i32
+
+    48 0000ssss i32 --- tbld byte ptr, reg      load value from ptr in table into register. byteptr is an index into table
+    49 0000ssss i32 --- tbld word ptr, reg      load value from ptr in table into register. byteptr is an index into table
+    4A 0000ssss i32 --- tbld dword ptr, reg     load value from ptr in table into register. byteptr is an index into table
+ 
+    4C dddd0000 i32 --- tlea reg, reg           calculate table address (tb0 + (tb1 * reg))
+    4D dddd0000 i32 --- tlea i8, reg            calculate table address (tb0 + (tb1 * i8)) 
+    4E dddd0000 i32 --- tlea i16, reg           calculate table address (tb0 + (tb1 * i16)) 
+    4F dddd0000 i32 --- tlea i32, reg           calculate table address (tb0 + (tb1 * i32)) 
+
+    50 ddddssss     --- and reg, reg
+    51 dddd0000     --- and i8, reg
+    52 dddd0000     --- and i16, reg
+    53 dddd0000     --- and i32, reg
+
+    54 ddddssss     --- or reg, reg
+    55 dddd0000     --- or i8, reg
+    56 dddd0000     --- or i16, reg
+    57 dddd0000     --- or i32, reg
+
+    58 ddddssss     --- xor reg, reg
+    59 dddd0000     --- xor i8, reg
+    5A dddd0000     --- xor i16, reg
+    5B dddd0000     --- xor i32, reg
+
+    5C i8           --- jsr i8
+    5D i8           --- jsr i16
+    5E i8           --- jsr imm32
+    5F 0000ssss     --- jsr reg
+    
+    80 i8           --- int i8
+    81              --- cli
+    82              --- sti
+    83              --- hlt
+
+JUMP INSTRUCTIONS
+    jmp label       --- expands to `add imm32, pc' OR `sub imm32, pc' (assembler will calculate required imm32 and opcode)
+    jmpa label      --- expands to `mov imm32, pc' where imm32 is the absolute address of the label
+
+PREFIXES
+    prefix E0: CNZR, CNEQ        execute if Z=0 ( zero/equal )
+    prefix E1: CZR, CEQ          execute if Z=1 ( nonzero/not equal )
+    prefix E2: CNCR, CNBR        exeucte if C=0 ( carry/borrow )
+    prefix E3: CCR, CBR          execute if C=1 ( no carry/no borrow )
+    prefix E4: CPOS, CNSG, CGT   execute if S=0 ( positive/no sign/greatear ) 
+    prefix E5: CNEG, CSGN, CLT   execute if S=1 ( negative/sign/lesser )
+    prefix E6: CGTE, CNLT        execute if Z=0 OR S=0 (greater or equal/not lesser)
+    prefix E7: CLTE, CNGT        execute if Z=0 OR S=1 (lesser or equal/not greater)

@@ -2,36 +2,37 @@
 #include <stdio.h>
 #include "types.h"
 #include "processor.h"
+#include "bios.h"
 #include "debug.h"
-
-void *cpu_thr(void *arg) {
-    Arch *arch = (Arch*)arg;
-    pthread_barrier_wait(&arch->barrier);
-    mainloop(arch);
-    return NULL;
-}
 
 void *biosc_thr(void *arg) {
     Arch *arch = (Arch*)arg;
     pthread_barrier_wait(&arch->barrier);
+    biosc_loop(arch);
+    #ifdef DEBUG
+        printf(DBGTAG_THREAD"BIOSC_THR finished executing\n", CALC_TICKSARR);
+    #endif
     return NULL;
 }
 
 void *biosp_thr(void *arg) {
     Arch *arch = (Arch*)arg;
     pthread_barrier_wait(&arch->barrier);
+    biosp_loop(arch);
+    #ifdef DEBUG
+        printf(DBGTAG_THREAD"BIOSP_THR finished executing\n", CALC_TICKSARR);
+    #endif
     return NULL;
 }
 
-int init_cpu_thr(Arch *arch) {
-    pthread_t thread_id;
-    int res = pthread_create(&thread_id, NULL, cpu_thr, (void*)arch);
-    if (res) return res;
-    arch->processor.cpu_thr_id = thread_id;
+void *cpu_thr(void *arg) {
+    Arch *arch = (Arch*)arg;
+    pthread_barrier_wait(&arch->barrier);
+    mainloop(arch);
     #ifdef DEBUG
-        printf(DBGTAG_THREAD"Initialized CPU_THR with thread id %I64d\n", CALC_TICKSARR, thread_id);
+        printf(DBGTAG_THREAD"CPU_THR finished executing\n", CALC_TICKSARR);
     #endif
-    return 0;
+    return NULL;
 }
 
 int init_biosc_thr(Arch *arch) {
@@ -56,6 +57,17 @@ int init_biosp_thr(Arch *arch) {
     return 0;
 }
 
+int init_cpu_thr(Arch *arch) {
+    pthread_t thread_id;
+    int res = pthread_create(&thread_id, NULL, cpu_thr, (void*)arch);
+    if (res) return res;
+    arch->processor.cpu_thr_id = thread_id;
+    #ifdef DEBUG
+        printf(DBGTAG_THREAD"Initialized CPU_THR with thread id %I64d\n", CALC_TICKSARR, thread_id);
+    #endif
+    return 0;
+}
+
 int init_thr(Arch *arch) {
     pthread_barrier_t barrier;
     int res = pthread_barrier_init(&barrier, NULL, 3);
@@ -67,13 +79,6 @@ int init_thr(Arch *arch) {
     }
     arch->barrier = barrier;
 
-    res = init_cpu_thr(arch);
-    if (res) {
-        #ifdef DEBUG
-            printf(DBGTAG_THREAD"Failed to initialize CPU_THR with error %d\n", CALC_TICKSARR, res);
-        #endif
-        return res;
-    }
     res = init_biosc_thr(arch);
     if (res) {
         #ifdef DEBUG
@@ -88,6 +93,13 @@ int init_thr(Arch *arch) {
             printf(DBGTAG_THREAD"Failed to initialize BIOSP_THR with error %d\n", CALC_TICKSARR, res);
         #endif
         arch->processor.on = 0;
+        return res;
+    }
+    res = init_cpu_thr(arch);
+    if (res) {
+        #ifdef DEBUG
+            printf(DBGTAG_THREAD"Failed to initialize CPU_THR with error %d\n", CALC_TICKSARR, res);
+        #endif
         return res;
     }
     return 0;

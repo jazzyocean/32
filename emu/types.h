@@ -21,10 +21,12 @@ typedef struct drive {
     uint8_t *disk;
     uint64_t limit;
     uint32_t signature;
+    uint64_t ptr;
 } Drive;
 
 typedef enum DRIVESIGNATURE {
-    DRIVE_EMPTY = 0b1, DRIVE_R = 0b10, DRIVE_RW = 0b100, DRIVE_SYS = 0b1000,
+    DRIVE_EMPTY = 0b1, DRIVE_R = 0b10, DRIVE_W = 0b100, DRIVE_SYS = 0b1000,
+    
     DRIVE_GENERAL = 0b10000, DRIVE_REG = 0b100000, DRIVE_LOAD = 0b1000000
 } DRIVESIGTYPE;
 
@@ -37,6 +39,7 @@ typedef struct _bios {
     uint16_t devmapout[17];
     pthread_t biosc_thr_id;
     pthread_t biosp_thr_id;
+    int cached_disk;
 } Bios;
 
 typedef struct _processor {

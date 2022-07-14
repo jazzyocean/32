@@ -5,6 +5,8 @@
 
 void biosc_loop(Arch *arch);
 void biosp_loop(Arch *arch);
-void initdisk(Bios *bios, char* filepath);
+void initdisk(Drive *bios, char* filepath);
+int findAvailableDisk(Bios *bios);
+void displayDrive(Drive *drive, int num);
 
 #endif

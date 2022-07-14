@@ -13,12 +13,16 @@
 #define sp 9
 #define pc 10
 #define fl 11
+#define tb0 12
+#define tb1 13
 
-#define fz 0
-#define fc 1
-#define fs 2
-#define fo 3
-#define fi 4
+#define fz 0x1
+#define fc 0x2
+#define fs 0x4
+#define fo 0x8
+#define fi 0x10
+#define fe 0x20
+#define fpv 0x6000
 
 
 #define portsloc 0x70000

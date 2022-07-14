@@ -5,7 +5,6 @@
 #include <time.h>
 #include "types.h"
 
-void initdisk(Processor *cpu, char* filepath);
 void initmem(Processor *cpu, uint64_t memlimit);
 int testbit(uint32_t v, int b);
 void cleanproc(Processor *cpu);

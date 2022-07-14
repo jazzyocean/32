@@ -1,0 +1,1 @@
+unsigned char bootrom[512] = {131,};

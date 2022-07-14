@@ -2,39 +2,39 @@
 #include <stdlib.h>
 #include <string.h>
 #include "processor.h"
+#include "bios.h"
 #include "consts.h"
 #include "types.h"
 #include "debug.h"
 #include "thread.h"
+#include "bootrom.h"
 
 int main() {
     Arch arch;
 
-    initdisk(&arch.processor, "test.bin");
-    initmem(&arch.processor, 0xFFFF);
+    Drive empty = {.disk = NULL, .limit = 0, .signature = DRIVE_EMPTY};
+    for (int i = 0; i < 16; i++) arch.bios.drives[i] = empty;
 
-    Drive onload = {.disk = malloc(512), .limit = 512, .signature = DRIVE_SYS | DRIVE_LOAD};
-    uint8_t _disk[512] = {
-    //    00    01    02    03    04    05    06   07     08    09    0A    0B    0C    0D    0E   0F
-        0x83, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // 10
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // 20
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // 30
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // 40
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // 50
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // 60
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // 70
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // 80
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // 90
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // A0
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // B0
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // C0
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // D0
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // E0
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // F0
-    };
-    memcpy(&arch.processor.memory[0x7E00], _disk, 512);
-    memcpy(onload.disk, _disk, 512);
+    initmem(&arch.processor, 0x7FFFFF+1);
+    
+    Drive onload = {.disk = malloc(512), .limit = 512, .signature = DRIVE_SYS | DRIVE_R | DRIVE_LOAD};
+    memcpy(&arch.processor.memory[0x7E00], bootrom, 512);
+    memcpy(onload.disk, bootrom, 512);
     arch.bios.drives[15] = onload;
+
+    Drive hd0 = {.disk = NULL, .limit = 0, .signature = DRIVE_GENERAL | DRIVE_R | DRIVE_W };
+    initdisk(&hd0, "test.bin");
+    int drivenumber = findAvailableDisk(&arch.bios);
+    if (drivenumber < 16) {
+        printf(DBGTAG_BIOS"Loading %s as hd%x\n", CALC_TICKSDOT, "test.bin", drivenumber);
+        arch.bios.drives[drivenumber] = hd0;
+    }
+
+    printf(DBGTAG_BIOS"DRIVE   PRMS   SIZE\n", CALC_TICKSDOT);
+    for (int i = 0; i < 16; i++) {
+        printf(DBGTAG_BIOS, CALC_TICKSDOT);
+        displayDrive(&arch.bios.drives[i], i);
+    }
 
     init_thr(&arch);
     thr_join(&arch);
@@ -51,13 +51,16 @@ int main() {
         printf(DBGTAG_INFODUMP" | GA=%08x GB=%08x GC=%08x GD=%08x\n"DBGTAG_INFODUMP" | GE=%08x GF=%08x GG=%08x\n",
             CALC_TICKSDOT, arch.processor.registers[ga], arch.processor.registers[gb], arch.processor.registers[gc], arch.processor.registers[gd],
             CALC_TICKSDOT, arch.processor.registers[ge], arch.processor.registers[gf], arch.processor.registers[gg]);
-        printf(DBGTAG_INFODUMP" | pv=%d ", CALC_TICKSDOT, (arch.processor.registers[fl] & 0b1100000000000000) >> 14);
-        if (testbit(arch.processor.registers[fl], fz)) printf("fz ");
-        if (testbit(arch.processor.registers[fl], fc)) printf("fc ");
-        if (testbit(arch.processor.registers[fl], fs)) printf("fs ");
+        printf(DBGTAG_INFODUMP" | pv=%d", CALC_TICKSDOT, (arch.processor.registers[fl] & 0b1100000000000000) >> 14);
+        if (arch.processor.registers[fl] & fz) printf(", Z");
+        if (arch.processor.registers[fl] & fc) printf(", C");
+        if (arch.processor.registers[fl] & fs) printf(", S");
+        if (arch.processor.registers[fl] & fo) printf(", O");
+        if (arch.processor.registers[fl] & fi) printf(", I");
+        if (arch.processor.registers[fl] & fe) printf(", E");
         printf("\n");
         printf(DBGTAG_INFODUMP" | PC=%08x, SP=%08x, BP=%08x\n", CALC_TICKSDOT, arch.processor.registers[pc], arch.processor.registers[sp], arch.processor.registers[bp]);
-    //#endif
-
+   //#endif
+    printf("\n\n%I64d\n\n", sizeof(Arch));
     return 0;
 }
