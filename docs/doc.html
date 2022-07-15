@@ -109,7 +109,7 @@
         },
 
         0x04: {
-            "mn": "LDR",
+            "mn": "MOV",
             "src": "byte*",
             "dst": "reg",
             "flset": "zs",
@@ -117,7 +117,7 @@
             "desc": "Loads data into register from memory"
         },
         0x05: {
-            "mn": "LDR",
+            "mn": "MOV",
             "src": "word*",
             "dst": "reg",
             "flset": "zs",
@@ -125,7 +125,7 @@
             "desc": "Loads data into register from memory"
         },
         0x06: {
-            "mn": "LDR",
+            "mn": "MOV",
             "src": "dword*",
             "dst": "reg",
             "flset": "zs",
@@ -133,7 +133,7 @@
             "desc": "Loads data into register from memory"
         },
         0x07: {
-            "mn": "LDR",
+            "mn": "MOV",
             "src": "byte*r",
             "dst": "reg",
             "flset": "zs",
@@ -141,7 +141,7 @@
             "desc": "Loads data into register from memory"
         },
         0x08: {
-            "mn": "LDR",
+            "mn": "MOV",
             "src": "word*r",
             "dst": "reg",
             "flset": "zs",
@@ -149,7 +149,7 @@
             "desc": "Loads data into register from memory"
         },
         0x09: {
-            "mn": "LDR",
+            "mn": "MOV",
             "src": "dword*r",
             "dst": "reg",
             "flset": "zs",
@@ -158,7 +158,7 @@
         },
 
         0x0a: {
-            "mn": "STR",
+            "mn": "MOV",
             "src": "reg",
             "dst": "byte*",
             "flset": "",
@@ -166,7 +166,7 @@
             "desc": "Stores data to memory from register"
         },
         0x0b: {
-            "mn": "STR",
+            "mn": "MOV",
             "src": "reg",
             "dst": "word*",
             "flset": "",
@@ -174,7 +174,7 @@
             "desc": "Stores data to memory from register"
         },
         0x0c: {
-            "mn": "STR",
+            "mn": "MOV",
             "src": "reg",
             "dst": "dword*",
             "flset": "",
@@ -182,7 +182,7 @@
             "desc": "Stores data to memory from register"
         },
         0x0d: {
-            "mn": "STR",
+            "mn": "MOV",
             "src": "reg",
             "dst": "byte*r",
             "flset": "",
@@ -190,7 +190,7 @@
             "desc": "Stores data to memory from register"
         },
         0x0e: {
-            "mn": "STR",
+            "mn": "MOV",
             "src": "reg",
             "dst": "word*r",
             "flset": "",
@@ -198,7 +198,7 @@
             "desc": "Stores data to memory from register"
         },
         0x0f: {
-            "mn": "STR",
+            "mn": "MOV",
             "src": "reg",
             "dst": "dword*r",
             "flset": "",
@@ -404,15 +404,15 @@
         },
 
         0x28: {
-            "mn": "JSR",
-            "src": "imm8",
+            "mn": "JSRA",
+            "src": "reg",
             "dst": "",
             "flset": "",
             "fltest": "",
             "desc": "Jump to subroutine"
         },
         0x29: {
-            "mn": "JSR",
+            "mn": "JSRA",
             "src": "imm16",
             "dst": "",
             "flset": "",
@@ -420,7 +420,7 @@
             "desc": "Jump to subroutine"
         },
         0x2A: {
-            "mn": "JSR",
+            "mn": "JSRA",
             "src": "imm32",
             "dst": "",
             "flset": "",
@@ -689,7 +689,7 @@
             "fltest": "",
             "desc": "Loads byte from pointer in table indexed by the pointer"
         },
-        0x4B: {
+        0x4C: {
             "mn": "TLEA",
             "src": "reg",
             "dst": "reg",
@@ -821,7 +821,65 @@
             "fltest": "",
             "desc": "Logical xor"
         },
+        
 
+        0x5C: {
+            "mn": "JSR",
+            "src": "imm8",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Relative jump to subroutine"
+        },
+        0x5D: {
+            "mn": "JSR",
+            "src": "imm16",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Relative jump to subroutine"
+        },
+        0x5E: {
+            "mn": "JSR",
+            "src": "imm32",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Relative jump to subroutine"
+        },
+        0x5F: {
+            "mn": "JSR",
+            "src": "reg",
+            "dst": "",
+            "flset": "",
+            "fltest": "",
+            "desc": "Relative jump to subroutine"
+        },
+
+        0x60: {
+            "mn": "MOV",
+            "src": "byte*r",
+            "dst": "byte*r",
+            "flset": "",
+            "fltest": "",
+            "desc": "Moves data into memory"
+        },
+        0x61: {
+            "mn": "MOV",
+            "src": "word*r",
+            "dst": "word*r",
+            "flset": "",
+            "fltest": "",
+            "desc": "Moves data into memory"
+        },
+        0x62: {
+            "mn": "MOV",
+            "src": "dword*r",
+            "dst": "dword*r",
+            "flset": "",
+            "fltest": "",
+            "desc": "Moves data into memory"
+        },
 
         0x80: {
             "mn": "INT",

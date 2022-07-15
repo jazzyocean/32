@@ -280,28 +280,31 @@ void instruction(Processor *cpu) {
         uint8_t regbyte = 0;
         uint32_t imm = 0;
 
-        if (byte < 0x28 || byte == 0x2F || (byte >= 0x34 && byte != 0x37 && byte != 0x3B && byte != 0x3E && byte != 0x3F) || byte >= 0x44) {
+        if (byte <= 0x28 || byte == 0x2F || (byte >= 0x34 && byte != 0x37 && byte != 0x3B && byte != 0x3E && byte != 0x3F) || byte >= 0x44) {
             regbyte = mgetb(cpu, cpu->registers[pc]++);
         }
 
         if (byte == 0x01 || byte == 0x11 || byte == 0x15 || byte == 0x19 ||
-            byte == 0x1d || byte == 0x21 || byte == 0x25 || byte == 0x28 ||
-            byte == 0x2c || byte == 0x33 || byte == 0x45 || byte == 0x80) {
+            byte == 0x1d || byte == 0x21 || byte == 0x25 || byte == 0x2c ||
+            byte == 0x33 || byte == 0x45 || byte == 0x80 || byte == 0x50 ||
+            byte == 0x54 || byte == 0x58) {
                 imm = mgetb(cpu, cpu->registers[pc]++);
             }
         else if (byte == 0x02 || byte == 0x12 || byte == 0x16 || byte == 0x1A ||
                 byte == 0x1e || byte == 0x22 || byte == 0x26 || byte == 0x29 ||
-                byte == 0x2d || byte == 0x37 || byte == 0x46) {
+                byte == 0x2d || byte == 0x37 || byte == 0x46 | byte == 0x51 ||
+                byte == 0x55 || byte == 0x59) {
                     imm = mgetw(cpu, cpu->registers[pc]);
                     cpu->registers[pc] += 2;
                 }
         else if (byte == 0x03 || byte == 0x13 || byte == 0x17 || byte == 0x1B ||
                 byte == 0x1F || byte == 0x23 || byte == 0x27 || byte == 0x2A ||
-                byte == 0x2e || byte == 0x38 || byte == 0x47) {
+                byte == 0x2e || byte == 0x38 || byte == 0x47 || byte == 0x52 ||
+                byte == 0x56 || byte == 0x5A) {
                     imm = mgetdw(cpu, cpu->registers[pc]);
                     cpu->registers[pc] += 4;
                 }
-        else if ((byte >= 0x04 && byte <= 0x06) || (byte >= 0x0A && byte <= 0x0C) || byte == 0x43) {
+        else if ((byte >= 0x04 && byte <= 0x06) || (byte >= 0x0A && byte <= 0x0C) || byte == 0x43 || (byte >= 0x48 && byte <= 0x4A)) {
                 imm = mgetdw(cpu, cpu->registers[pc]);
                 cpu->registers[pc] += 4;
         }
@@ -323,84 +326,84 @@ void instruction(Processor *cpu) {
                 break;
             }
             
-            case 0x04: {    // ldr byte ptr imm32, reg
+            case 0x04: {    // mov byte ptr imm32, reg
                 cpu->registers[dstreg] = mgetb(cpu, imm);
                 arithmaticFlags;
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> ldr byte [%08x], %s\n", CALC_TICKS, starting_pc, imm, regnames[dstreg]);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov byte [%08x], %s\n", CALC_TICKS, starting_pc, imm, regnames[dstreg]);
                 #endif
                 break;
-            } case 0x05: {    // ldr word ptr imm32, reg
+            } case 0x05: {    // mov word ptr imm32, reg
                 cpu->registers[dstreg] = mgetw(cpu, imm);
                 arithmaticFlags;
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> ldr word [%08x], %s\n", CALC_TICKS, starting_pc, imm, regnames[dstreg]);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov word [%08x], %s\n", CALC_TICKS, starting_pc, imm, regnames[dstreg]);
                 #endif
                 break;
-            } case 0x06: {    // ldr dword ptr imm32, reg
+            } case 0x06: {    // mov dword ptr imm32, reg
                 cpu->registers[dstreg] = mgetdw(cpu, imm);
                 arithmaticFlags;
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> ldr dword [%08x], %s\n", CALC_TICKS, starting_pc, imm, regnames[dstreg]);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov dword [%08x], %s\n", CALC_TICKS, starting_pc, imm, regnames[dstreg]);
                 #endif
                 break;
-            } case 0x07: {    // ldr byte ptr reg, reg
+            } case 0x07: {    // mov byte ptr reg, reg
                 cpu->registers[dstreg] = mgetb(cpu, cpu->registers[srcreg]);
                 arithmaticFlags;
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> ldr byte [%s], %s\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov byte [%s], %s\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
                 #endif
                 break;
-            } case 0x08: {    // ldr word ptr reg, reg
+            } case 0x08: {    // mov word ptr reg, reg
                 cpu->registers[dstreg] = mgetw(cpu, cpu->registers[srcreg]);
                 arithmaticFlags;
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> ldr word [%s], %s\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov word [%s], %s\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
                 #endif
                 break;
-            } case 0x09: {    // ldr dword ptr reg, reg
+            } case 0x09: {    // mov dword ptr reg, reg
                 cpu->registers[dstreg] = mgetdw(cpu, cpu->registers[srcreg]);
                 arithmaticFlags;
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> ldr dword [%s], %s\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov dword [%s], %s\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
                 #endif
                 break;
             }
 
-            case 0x0A: {    // str reg, byte ptr imm32
+            case 0x0A: {    // mov reg, byte ptr imm32
                 msetb(cpu, imm, cpu->registers[srcreg] & 0xFF);
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> str %s, byte [%08x]\n", CALC_TICKS, starting_pc, regnames[srcreg], imm);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov %s, byte [%08x]\n", CALC_TICKS, starting_pc, regnames[srcreg], imm);
                 #endif
                 break;
-            } case 0x0B: {    // str reg, word ptr imm32
+            } case 0x0B: {    // mov reg, word ptr imm32
                 msetw(cpu, imm, cpu->registers[srcreg] & 0xFFFF);
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> str %s, word [%08x]\n", CALC_TICKS, starting_pc, regnames[srcreg], imm);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov %s, word [%08x]\n", CALC_TICKS, starting_pc, regnames[srcreg], imm);
                 #endif
                 break;
-            } case 0x0C: {    // str dword ptr imm32, reg
+            } case 0x0C: {    // mov dword ptr imm32, reg
                 msetdw(cpu, imm, cpu->registers[srcreg]);
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> str %s, dword [%08x]\n", CALC_TICKS, starting_pc, regnames[srcreg], imm);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov %s, dword [%08x]\n", CALC_TICKS, starting_pc, regnames[srcreg], imm);
                 #endif
                 break;
-            } case 0x0D: {    // str byte ptr reg, reg
+            } case 0x0D: {    // mov byte ptr reg, reg
                 msetb(cpu, cpu->registers[dstreg], cpu->registers[srcreg]&0xFF);
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> str %s, byte [%s]\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov %s, byte [%s]\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
                 #endif
                 break;
-            } case 0x0E: {    // str word ptr reg, reg
+            } case 0x0E: {    // mov word ptr reg, reg
                 msetw(cpu, cpu->registers[dstreg], cpu->registers[srcreg]&0xFFFF);
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> str %s, word [%s]\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov %s, word [%s]\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
                 #endif
                 break;
-            } case 0x0F: {    // str dword ptr reg, reg
+            } case 0x0F: {    // mov dword ptr reg, reg
                 msetdw(cpu, cpu->registers[dstreg], cpu->registers[srcreg]&0xFFFFFFFF);
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> str %s, dword [%s]\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov %s, dword [%s]\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
                 #endif
                 break;
             }
@@ -546,11 +549,19 @@ void instruction(Processor *cpu) {
                 break;
             }
 
-            case 0x28: case 0x29: case 0x2A: {
+            case 0x28: {
+                pushdw(cpu, cpu->registers[pc]);
+                cpu->registers[pc] = cpu->registers[srcreg];
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> jsra $%x\n", CALC_TICKS, starting_pc, imm);
+                #endif
+                break;
+            }
+            case 0x29: case 0x2A: {
                 pushdw(cpu, cpu->registers[pc]);
                 cpu->registers[pc] = imm;
                 #ifdef VERBOSE
-                    printf(DBGTAG_VERBOSE"0x%08x>> jsr $%x\n", CALC_TICKS, starting_pc, imm);
+                    printf(DBGTAG_VERBOSE"0x%08x>> jsra $%x\n", CALC_TICKS, starting_pc, imm);
                 #endif
                 break;
             }
@@ -721,6 +732,151 @@ void instruction(Processor *cpu) {
                 break;
             }
             
+            case 0x48: {    // tbld byte ptr, reg
+                cpu->registers[dstreg] = mgetb(cpu, cpu->registers[tb0] + (cpu->registers[tb1] * imm));
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> tbld byte [%08x], %s\n", CALC_TICKS, starting_pc, imm, regnames[srcreg]);
+                #endif
+                break;
+            }
+            case 0x49: {    // tbld word ptr, reg
+                cpu->registers[dstreg] = mgetw(cpu, cpu->registers[tb0] + (cpu->registers[tb1] * imm));
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> tbld word [%08x], %s\n", CALC_TICKS, starting_pc, imm, regnames[srcreg]);
+                #endif
+                break;
+            }
+            case 0x4A: {    // tbld dword ptr, reg
+                cpu->registers[dstreg] = mgetdw(cpu, cpu->registers[tb0] + (cpu->registers[tb1] * imm));
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> tbld dword [%08x], %s\n", CALC_TICKS, starting_pc, imm, regnames[srcreg]);
+                #endif
+                break;
+            }
+
+            
+            case 0x4C: {    // tlea reg, reg
+                cpu->registers[dstreg] = cpu->registers[tb0]+(cpu->registers[tb1]*cpu->registers[srcreg]);
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> tlea %s, %s\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                #endif
+                break;
+            } case 0x4D: case 0x4E: case 0x4F: {    // tlea imm(3), reg
+                cpu->registers[dstreg] = cpu->registers[tb0]+(cpu->registers[tb1]*imm);
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> tlea $%x, %s\n", CALC_TICKS, starting_pc, imm, regnames[dstreg]);
+                #endif
+                break;
+            }
+
+            case 0x50: {    // and reg, reg
+                cpu->registers[dstreg] &= cpu->registers[srcreg];
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> and %s, %s\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                #endif
+                break;
+            } case 0x51: case 0x52: case 0x53: {    // and imm(3), reg
+                cpu->registers[dstreg] &= imm;
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> and $%x, %s\n", CALC_TICKS, starting_pc, imm, regnames[dstreg]);
+                #endif
+                break;
+            }
+
+            case 0x54: {    // or reg, reg
+                cpu->registers[dstreg] |= cpu->registers[srcreg];
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> or %s, %s\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                #endif
+                break;
+            } case 0x55: case 0x56: case 0x57: {    // and imm(3), reg
+                cpu->registers[dstreg] |= imm;
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> or $%x, %s\n", CALC_TICKS, starting_pc, imm, regnames[dstreg]);
+                #endif
+                break;
+            }
+
+            case 0x58: {    // xor reg, reg
+                cpu->registers[dstreg] ^= cpu->registers[srcreg];
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> xor %s, %s\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                #endif
+                break;
+            } case 0x59: case 0x5A: case 0x5B: {    // xor imm(3), reg
+                cpu->registers[dstreg] ^= imm;
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> xor $%x, %s\n", CALC_TICKS, starting_pc, imm, regnames[dstreg]);
+                #endif
+                break;
+            }
+
+            case 0x5C: {
+                pushdw(cpu, cpu->registers[pc]);
+                cpu->registers[pc] += (int8_t)imm;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> jsr $%x\n", CALC_TICKS, starting_pc, imm);
+                #endif
+                break;
+            }
+            case 0x5D: {
+                pushdw(cpu, cpu->registers[pc]);
+                cpu->registers[pc] += (int16_t)imm;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> jsr $%x\n", CALC_TICKS, starting_pc, imm);
+                #endif
+                break;
+            }
+            case 0x5E: {
+                pushdw(cpu, cpu->registers[pc]);
+                cpu->registers[pc] += (int32_t)imm;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> jsr $%x\n", CALC_TICKS, starting_pc, imm);
+                #endif
+                break;
+            }
+            case 0x5F: {
+                pushdw(cpu, cpu->registers[pc]);
+                cpu->registers[pc] += (int32_t)cpu->registers[srcreg];
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> jsr $%x\n", CALC_TICKS, starting_pc, imm);
+                #endif
+                break;
+            }
+
+            case 0x60: {    // mov byte ptr reg, byte ptr reg
+                msetb(cpu, cpu->registers[dstreg], mgetb(cpu, cpu->registers[srcreg]));
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov byte [%s], byte [%s]\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                #endif
+                break;
+            } case 0x61: {    // mov word ptr reg, word ptr reg
+                msetw(cpu, cpu->registers[dstreg], mgetw(cpu, cpu->registers[srcreg]));
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov word [%s], word [%s]\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                #endif
+                break;
+            } case 0x62: {    // mov dword ptr reg, dword ptr reg
+                msetdw(cpu, cpu->registers[dstreg], mgetdw(cpu, cpu->registers[srcreg]));
+                arithmaticFlags;
+                #ifdef VERBOSE
+                    printf(DBGTAG_VERBOSE"0x%08x>> mov dword [%s], dword [%s]\n", CALC_TICKS, starting_pc, regnames[srcreg], regnames[dstreg]);
+                #endif
+                break;
+            }
 
             case 0x80: {
                 cpu->intid = imm;

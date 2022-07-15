@@ -89,19 +89,19 @@ INSTRUCTIONS:
     02 dddd0000 i16 --- mov i16, reg
     03 dddd0000 i32 --- mov i32, reg
 
-    04 dddd0000 i32 --- ldr byteptr i32, reg
-    05 dddd0000 i32 --- ldr wordptr i32, reg
-    06 dddd0000 i32 --- ldr dwordptr i32, reg
-    07 ddddssss     --- ldr byteptr reg, reg
-    08 ddddssss     --- ldr wordptr reg, reg
-    09 ddddssss     --- ldr dwordptr reg, reg
+    04 dddd0000 i32 --- mov byteptr i32, reg
+    05 dddd0000 i32 --- mov wordptr i32, reg
+    06 dddd0000 i32 --- mov dwordptr i32, reg
+    07 ddddssss     --- mov byteptr reg, reg
+    08 ddddssss     --- mov wordptr reg, reg
+    09 ddddssss     --- mov dwordptr reg, reg
 
-    0A dddd0000 i32 --- str reg, byteptr i32
-    0B dddd0000 i32 --- str reg, wordptr i32
-    0C dddd0000 i32 --- str reg, dwordptr i32
-    0D ddddssss     --- str reg, byteptr reg
-    0E ddddssss     --- str reg, wordptr reg
-    0F ddddssss     --- str reg, dwordptr reg
+    0A dddd0000 i32 --- mov reg, byteptr i32
+    0B dddd0000 i32 --- mov reg, wordptr i32
+    0C dddd0000 i32 --- mov reg, dwordptr i32
+    0D ddddssss     --- mov reg, byteptr reg
+    0E ddddssss     --- mov reg, wordptr reg
+    0F ddddssss     --- mov reg, dwordptr reg
 
     10 ddddssss     --- add reg, reg
     11 dddd0000 i8  --- add i8, reg
@@ -199,6 +199,10 @@ INSTRUCTIONS:
     5D i8           --- jsr i16
     5E i8           --- jsr imm32
     5F 0000ssss     --- jsr reg
+
+    60 ddddssss     --- mov byte ptr reg, byte ptr reg
+    61 ddddssss     --- mov word ptr reg, word ptr reg
+    62 ddddssss     --- mov dword ptr reg, dword ptr reg
     
     80 i8           --- int i8
     81              --- cli
