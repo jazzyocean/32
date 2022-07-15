@@ -103,6 +103,10 @@ INSTRUCTIONS:
     0E ddddssss     --- mov reg, wordptr reg
     0F ddddssss     --- mov reg, dwordptr reg
 
+    60 ddddssss     --- mov byte ptr reg, byte ptr reg
+    61 ddddssss     --- mov word ptr reg, word ptr reg
+    62 ddddssss     --- mov dword ptr reg, dword ptr reg
+
     10 ddddssss     --- add reg, reg
     11 dddd0000 i8  --- add i8, reg
     12 dddd0000 i16 --- add i16, reg
@@ -131,9 +135,22 @@ INSTRUCTIONS:
     26 dddd0000 i16 --- div i16, reg    ;; Store remainder in dst, result in accumulator
     27 dddd0000 i32 --- div i32, reg    ;; Store remainder in dst, result in accumulator
     
-    28 0000ssss     --- jsra reg
-    29 i16          --- jsra i16
-    2A i32          --- jsra i32
+    28 0000ssss     --- jsra/calla reg
+    29 i16          --- jsra/calla i16
+    2A i32          --- jsra/calla i32
+    
+    5C i8           --- jsr/call i8
+    5D i8           --- jsr/call i16
+    5E i8           --- jsr/call imm32
+    5F 0000ssss     --- jsr/call reg
+    
+    33 i8           --- jcnz i8
+    37 i16          --- jcnz i16
+    3B i32          --- jcnz i32
+
+                    --- jmp label       ;; expands to `add imm32, pc' OR `sub imm32, pc' (assembler will calculate required imm32 and opcode)
+                    --- jmpa label      ;; expands to `mov imm32, pc' where imm32 is the absolute address of the label
+    
     2B              --- rts/ret
 
     2C i8           --- push i8
@@ -144,17 +161,14 @@ INSTRUCTIONS:
     30 i32          --- push byte ptr
     31 i32          --- push word ptr
     32 i32          --- push dword ptr
-    33 i8           --- jcnz i8
 
     34 0000ssss     --- push byte ptr reg
     35 0000ssss     --- push word ptr reg
     36 0000ssss     --- push dword ptr reg
-    37 i16          --- jcnz i16
 
     38              --- popb reg
     39              --- popw reg
     3A              --- pop reg
-    3B i32          --- jcnz i32
 
     3C dddd0000     --- inc reg
     3D dddd0000     --- dec reg
@@ -171,14 +185,14 @@ INSTRUCTIONS:
     46 0000ssss i16 --- cmp reg, i16
     47 0000ssss i32 --- cmp reg, i32
 
-    48 0000ssss i32 --- tbld byte ptr, reg      load value from ptr in table into register. byteptr is an index into table
-    49 0000ssss i32 --- tbld word ptr, reg      load value from ptr in table into register. byteptr is an index into table
-    4A 0000ssss i32 --- tbld dword ptr, reg     load value from ptr in table into register. byteptr is an index into table
+    48 0000ssss i32 --- tbld byte ptr, reg      ;; load value from ptr in table into register. byteptr is an index into table
+    49 0000ssss i32 --- tbld word ptr, reg      ;; load value from ptr in table into register. byteptr is an index into table
+    4A 0000ssss i32 --- tbld dword ptr, reg     ;; load value from ptr in table into register. byteptr is an index into table
  
-    4C dddd0000 i32 --- tlea reg, reg           calculate table address (tb0 + (tb1 * reg))
-    4D dddd0000 i32 --- tlea i8, reg            calculate table address (tb0 + (tb1 * i8)) 
-    4E dddd0000 i32 --- tlea i16, reg           calculate table address (tb0 + (tb1 * i16)) 
-    4F dddd0000 i32 --- tlea i32, reg           calculate table address (tb0 + (tb1 * i32)) 
+    4C dddd0000 i32 --- tlea reg, reg           ;; calculate table address (tb0 + (tb1 * reg))
+    4D dddd0000 i32 --- tlea i8, reg            ;; calculate table address (tb0 + (tb1 * i8)) 
+    4E dddd0000 i32 --- tlea i16, reg           ;; calculate table address (tb0 + (tb1 * i16)) 
+    4F dddd0000 i32 --- tlea i32, reg           ;; calculate table address (tb0 + (tb1 * i32)) 
 
     50 ddddssss     --- and reg, reg
     51 dddd0000     --- and i8, reg
@@ -194,24 +208,11 @@ INSTRUCTIONS:
     59 dddd0000     --- xor i8, reg
     5A dddd0000     --- xor i16, reg
     5B dddd0000     --- xor i32, reg
-
-    5C i8           --- jsr i8
-    5D i8           --- jsr i16
-    5E i8           --- jsr imm32
-    5F 0000ssss     --- jsr reg
-
-    60 ddddssss     --- mov byte ptr reg, byte ptr reg
-    61 ddddssss     --- mov word ptr reg, word ptr reg
-    62 ddddssss     --- mov dword ptr reg, dword ptr reg
     
     80 i8           --- int i8
     81              --- cli
     82              --- sti
     83              --- hlt
-
-JUMP INSTRUCTIONS
-    jmp label       --- expands to `add imm32, pc' OR `sub imm32, pc' (assembler will calculate required imm32 and opcode)
-    jmpa label      --- expands to `mov imm32, pc' where imm32 is the absolute address of the label
 
 PREFIXES
     prefix E0: CNZR, CNEQ        execute if Z=0 ( zero/equal )
